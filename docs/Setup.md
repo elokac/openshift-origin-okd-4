@@ -9,10 +9,14 @@ This example is based on the environment like follows.
 | Control Node-2 - Fedora CoreOS	                   | okd4-control-plane-2  | 16.16.0.16    | 16GB	 | 4	|    50GB
 | Control Node-3 - Fedora CoreOS	                   | okd4-control-plane-3  | 16.16.0.17    | 16GB	 | 4	|    50GB
 
-1. ### Dnsmasq : Install and Configure
+1. ## Install and Configure dnsmasq
+We will begin by setting up Dnsmasq on the manager node to resolve the requests for the Kubernetes cluster
+
+- ### Install dnsmasq
+
 ```[root@mngr-node ~]# dnf -y install dnsmasq```
 
-2. ### Configure Dnsmasq
+- ### Configure Dnsmasq
 ```[root@mngr-node ~]# vim /etc/dnsmasq.conf```
 ```
 port=53
@@ -32,7 +36,7 @@ my domain name is local.com and 16.16.0.13 resolves all the requests directed to
 [root@mngr-node ~]# systemctl enable --now dnsmasq
 ```
 
-3. ### Configure DNS Records
+- ### Configure DNS Records
 Now add the DNS records to /etc/hosts. Dnsmasq will reply to all requests using the records here.
 ```
 [root@mngr-node ~]# vim /etc/hosts
@@ -51,8 +55,11 @@ nameserver 16.16.0.13
 nameserver 8.8.8.8
 ```
 Restart dnsmasq;
+
 ```[root@mngr-node ~]# systemctl restart dnsmasq```
+
 Allow firewall;
+
 ```
 [root@mngr-node ~]# firewall-cmd --permanent --add-port=53/udp
 [root@mngr-node ~]# firewall-cmd --reload
