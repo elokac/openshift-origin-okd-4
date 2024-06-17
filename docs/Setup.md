@@ -74,7 +74,7 @@ This will used to serve the ignition file to other nodes
 
 - ### Install nginx
 ```
-[root@mngr-node ~]#dnf -y install nginx
+[root@mngr-node ~]# dnf -y install nginx
 ```
 - ### Configure Nginx
 ```
@@ -89,8 +89,104 @@ This will used to serve the ignition file to other nodes
     }
 ```
 ```
-[root@mngr-node ~]#systemctl enable --now nginx
-[root@mngr-node ~]#firewall-cmd --add-service=http
+[root@mngr-node ~]# systemctl enable --now nginx
+[root@mngr-node ~]# firewall-cmd --add-service=http
 [root@mngr-node ~]#	firewall-cmd --runtime-to-permanent
+success
+```
+
+3. ## Install and Configure HAProxy
+Now, it's time to configure HAProxy which will be used to route traffic to individual Nodes.
+- ### Install HAProxy
+```
+[root@mngr-node ~]# dnf install haproxy git -y
+```
+- ### Configure HAProxy
+```
+[root@mngr-node ~]# vim /etc/haproxy/haproxy.cfg
+```
+```
+global
+  log         127.0.0.1 local2
+  pidfile     /var/run/haproxy.pid
+  maxconn     4000
+  daemon
+  stats socket /var/lib/haproxy/stats
+defaults
+  mode                    http
+  log                     global
+  option                  dontlognull
+  option http-server-close
+  option                  redispatch
+  retries                 3
+  timeout http-request    10s
+  timeout queue           1m
+  timeout connect         10s
+  timeout client          1m
+  timeout server          1m
+  timeout http-keep-alive 10s
+  timeout check           10s
+  maxconn                 3000
+listen stats
+  bind :9000
+  stats uri /stats
+  stats refresh 10000ms
+listen api-server-6443
+  bind *:6443
+  mode tcp
+  #option  httpchk GET /readyz HTTP/1.0
+  #option  log-health-checks
+  #balance roundrobin
+  server okd4-bootstrap       okd4-bootstrap.okd.local.com:6443 check
+  server okd4-control-plane-1 okd4-control-plane-1.okd.local.com:6443 check
+  server okd4-control-plane-2 okd4-control-plane-2.okd.local.com:6443 check
+  server okd4-control-plane-3 okd4-control-plane-3.okd.local.com:6443 check
+listen machine-config-server-22623
+  bind *:22623
+  mode tcp
+  server okd4-bootstrap       okd4-bootstrap.okd.local.com:22623 check inter 1s
+  server okd4-control-plane-1 okd4-control-plane-1.okd.local.com:22623 check inter 1s
+  server okd4-control-plane-2 okd4-control-plane-2.okd.local.com:22623 check inter 1s
+  server okd4-control-plane-3 okd4-control-plane-3.okd.local.com:22623 check inter 1s
+listen ingress-router-443
+  bind *:443
+  mode tcp
+  balance source
+  server okd4-control-plane-1 okd4-control-plane-1.okd.local.com:443 check inter 1s
+  server okd4-control-plane-2 okd4-control-plane-2.okd.local.com:443 check inter 1s
+  server okd4-control-plane-3 okd4-control-plane-3.okd.local.com:443 check inter 1s
+  # server okd4-worker-node-1 okd4-worker-node-1.okd.local.com:443 check inter 1s
+listen ingress-router-80
+  bind *:80
+  mode tcp
+  balance source
+  server okd4-control-plane-1 okd4-control-plane-1.okd.local.com:80 check inter 1s
+  server okd4-control-plane-2 okd4-control-plane-2.okd.local.com:80 check inter 1s
+  server okd4-control-plane-3 okd4-control-plane-3.okd.local.com:80 check inter 1s
+  # server okd4-worker-node-1 okd4-worker-node-1.okd.local.com:80 check inter 1s
+```
+Modify SELinux:
+```
+setsebool -P haproxy_connect_any 1
+setsebool -P httpd_can_network_connect on
+setsebool -P httpd_graceful_shutdown on
+setsebool -P httpd_can_network_relay on
+setsebool -P nis_enabled on
+semanage port -a -t http_port_t -p tcp 6443
+semanage port -a -t http_port_t -p tcp 22623
+semanage port -a -t http_port_t -p tcp 1936
+```
+Start and enable the service;
+```
+[root@mngr-node ~]# systemctl enable haproxy
+[root@mngr-node ~]# systemctl start haproxy
+[root@mngr-node ~]# systemctl status haproxy
+```
+Allow the OKD ports through the firewall;
+```
+[root@mngr-node ~]# firewall-cmd --add-port={6443/tcp,22623/tcp,1936/tcp}
+[root@mngr-node ~]# firewall-cmd --add-service={http,https}
+[root@mngr-node ~]# firewall-cmd --runtime-to-permanent
+[root@mngr-node ~]# firewall-cmd --reload
 success
 ```
