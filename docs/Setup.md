@@ -68,3 +68,29 @@ Test if the service is working as desired;
 ```
 [root@mngr-node ~]# dig api-int.okd.local.com
 ```
+
+2. ## Install and Configure Nginx
+This will used to serve the ignition file to other nodes
+
+- ### Install nginx
+```
+[root@mngr-node ~]#	dnf -y install nginx
+```
+- ### Configure Nginx
+```
+[root@mngr-node ~]#	vim /etc/nginx/nginx.conf
+```
+```
+ server {
+        listen       8080;
+        listen       [::]:8080;
+        server_name  okd.local.com;
+        root         /usr/share/nginx/html;
+    }
+```
+```
+[root@mngr-node ~]#	systemctl enable --now nginx
+[root@mngr-node ~]#	firewall-cmd --add-service=http
+[root@mngr-node ~]#	firewall-cmd --runtime-to-permanent
+success
+```
