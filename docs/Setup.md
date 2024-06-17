@@ -27,8 +27,10 @@ address=/apps.okd.local.com/16.16.0.13
 
 my domain name is local.com and 16.16.0.13 resolves all the requests directed to apps.okd.local.com. Once the desired changes have been made, save the file and restart the service:
 
-```[root@mngr-node ~]# systemctl restart dnsmasq```
-```[root@mngr-node ~]# systemctl enable --now dnsmasq```
+```
+[root@mngr-node ~]# systemctl restart dnsmasq
+[root@mngr-node ~]# systemctl enable --now dnsmasq
+```
 
 3. ### Configure DNS Records
 Now add the DNS records to /etc/hosts. Dnsmasq will reply to all requests using the records here.
