@@ -26,6 +26,7 @@ address=/apps.okd.local.com/16.16.0.13
 ```
 
 my domain name is local.com and 16.16.0.13 resolves all the requests directed to apps.okd.local.com. Once the desired changes have been made, save the file and restart the service:
+
 ```[root@mngr-node ~]# systemctl restart dnsmasq```
 ```[root@mngr-node ~]# systemctl enable --now dnsmasq```
 
