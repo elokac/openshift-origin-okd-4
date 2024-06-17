@@ -74,7 +74,7 @@ This will used to serve the ignition file to other nodes
 
 - ### Install nginx
 ```
-[root@mngr-node ~]#	dnf -y install nginx
+[root@mngr-node ~]#dnf -y install nginx
 ```
 - ### Configure Nginx
 ```
@@ -89,8 +89,8 @@ This will used to serve the ignition file to other nodes
     }
 ```
 ```
-[root@mngr-node ~]#	systemctl enable --now nginx
-[root@mngr-node ~]#	firewall-cmd --add-service=http
+[root@mngr-node ~]#systemctl enable --now nginx
+[root@mngr-node ~]#firewall-cmd --add-service=http
 [root@mngr-node ~]#	firewall-cmd --runtime-to-permanent
 success
 ```
