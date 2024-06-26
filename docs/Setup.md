@@ -167,14 +167,14 @@ listen ingress-router-80
 ```
 Modify SELinux:
 ```
-setsebool -P haproxy_connect_any 1
-setsebool -P httpd_can_network_connect on
-setsebool -P httpd_graceful_shutdown on
-setsebool -P httpd_can_network_relay on
-setsebool -P nis_enabled on
-semanage port -a -t http_port_t -p tcp 6443
-semanage port -a -t http_port_t -p tcp 22623
-semanage port -a -t http_port_t -p tcp 1936
+[root@mngr-node ~]# setsebool -P haproxy_connect_any 1
+[root@mngr-node ~]# setsebool -P httpd_can_network_connect on
+[root@mngr-node ~]# setsebool -P httpd_graceful_shutdown on
+[root@mngr-node ~]# setsebool -P httpd_can_network_relay on
+[root@mngr-node ~]# setsebool -P nis_enabled on
+[root@mngr-node ~]# semanage port -a -t http_port_t -p tcp 6443
+[root@mngr-node ~]# semanage port -a -t http_port_t -p tcp 22623
+[root@mngr-node ~]# semanage port -a -t http_port_t -p tcp 1936
 ```
 Start and enable the service;
 ```
@@ -190,3 +190,31 @@ Allow the OKD ports through the firewall;
 [root@mngr-node ~]# firewall-cmd --reload
 success
 ```
+
+4. ## Install openshift-installer and oc client
+Download the latest availabe versions from the OKD [releases page](https://github.com/okd-project/okd/releases).
+```
+[root@mngr-node ~]# wget https://github.com/openshift/okd/releases/download/4.11.0-0.okd-2022-07-29-154152/openshift-client-linux-4.11.0-0.okd-2022-07-29-154152.tar.gz \
+https://github.com/openshift/okd/releases/download/4.11.0-0.okd-2022-07-29-154152/openshift-install-linux-4.11.0-0.okd-2022-07-29-154152.tar.gz
+[root@mngr-node ~]# tar zxvf openshift-client-linux-4.11.0-0.okd-2022-07-29-154152.tar.gz
+[root@mngr-node ~]# tar zxvf openshift-install-linux-4.11.0-0.okd-2022-07-29-154152.tar.gz
+[root@mngr-node ~]# mv oc kubectl openshift-install /usr/local/bin/
+[root@mngr-node ~]# chmod 755 /usr/local/bin/{oc,kubectl,openshift-install}
+[root@mngr-node ~]# oc version
+Client Version: 4.11.0-0.okd-2022-07-29-154152
+Kustomize Version: v4.5.4
+```
+5. ## Setup the openshift-installer
+We need to make the configurations to the install-config.yaml. In this file, you need to make adjustments for the SSH and pull-secret from [RedHat](https://console.redhat.com/openshift/install/pull-secret). First, generate the SSH keys:
+- ### Generate SSH Keys
+generate SSH key-pair for Manager Node to each Node
+set passphrase if you need ⇒ if set it, it needs SSH-Agent, too (set no-passphrase on this example)
+```
+[root@mngr-node ~]# ssh-keygen -q -N ""
+Enter file in which to save the key (/root/.ssh/id_rsa):
+```
+- ### Download pull-secret from REDHAT
+Next is to downlaod pull-secret from REDHAT. This will enable the server to pull images needed to setup the cluster.
+Click the [link](https://console.redhat.com/openshift/install/pull-secret) and download the secrets. Create a free account incase you don't have.
+![Alt text](image-1.png)
+
