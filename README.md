@@ -1,5 +1,5 @@
 # Folder Content Summary
-1. ## [`docs`](https://github.com/elokac//tree/master/docs)
+1. ## [`docs`](https://github.com/elokac/openshift-origin-okd-4/tree/main/docs)
 
 This a documentation for OKD (version 4) installation on bare-metal.
 
