@@ -1,5 +1,5 @@
 # Folder Content Summary
-1. ## [`docs`](https://github.com/elokac//tree/master/docs)}
+1. ## [`docs`](https://github.com/elokac//tree/master/docs)
 
 This a documentation for OKD (version 4) installation on bare-metal.
 
